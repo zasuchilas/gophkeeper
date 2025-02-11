@@ -26,7 +26,7 @@ func upNewSecretsTable(ctx context.Context, tx *sql.Tx) error {
 		CREATE TABLE IF NOT EXISTS gophkeeper.secrets
 		(
 			id         SERIAL PRIMARY KEY,
-			data       TEXT      NOT NULL,
+			data       BYTEA     NOT NULL,
 			updated_at TIMESTAMP NOT NULL,
 			user_id    INTEGER   NOT NULL DEFAULT 0
 		);

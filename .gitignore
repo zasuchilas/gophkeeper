@@ -3,4 +3,5 @@
 .pgdata
 .data
 docker-compose.yml
-
+bin
+vendor.protogen

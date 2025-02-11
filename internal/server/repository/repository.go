@@ -7,6 +7,10 @@ var (
 	ErrAlreadyExists = errors.New("already exists")
 )
 
-// ServerRepository _
-type ServerRepository interface {
+// UserRepository _
+type UserRepository interface {
+}
+
+// SecretsRepository _
+type SecretsRepository interface {
 }
