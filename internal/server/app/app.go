@@ -2,12 +2,14 @@ package app
 
 import (
 	"context"
+	"github.com/zasuchilas/gophkeeper/internal/server/api/grpcserver"
 	"github.com/zasuchilas/gophkeeper/internal/server/config"
 	"github.com/zasuchilas/gophkeeper/internal/server/logger"
-	"github.com/zasuchilas/gophkeeper/internal/server/repository"
 	"github.com/zasuchilas/gophkeeper/internal/server/repository/pgsql"
+	"github.com/zasuchilas/gophkeeper/internal/server/service"
+	"github.com/zasuchilas/gophkeeper/internal/server/service/secrets"
+	"github.com/zasuchilas/gophkeeper/internal/server/service/user"
 	"log/slog"
-	"os"
 	"os/signal"
 	"syscall"
 )
@@ -15,8 +17,7 @@ import (
 type app struct {
 	build *buildInfo
 	ctx   context.Context
-	//grpcServer          *grpcserver.Server
-	serverRepo repository.ServerRepository
+	grpc  *grpcserver.Server
 }
 
 func New(buildVersion, buildDate, buildCommit string) *app {
@@ -28,46 +29,44 @@ func New(buildVersion, buildDate, buildCommit string) *app {
 
 func (a *app) Run() {
 
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
+
 	// loading configuration
 	cfg := config.MustLoad()
 
 	// setting logger
 	logger.SetupLogger(cfg.Env)
 	slog.Info("starting gothkeeper server", slog.String("env", cfg.Env))
-
-	// build info output
 	a.buildInfoOutput()
 
 	// repository
-	a.serverRepo = pgsql.MustInit(cfg.PostgreSQL)
+	repo := pgsql.MustInit(ctx, cfg.PostgreSQL)
+	_ = repo
 
-	slog.Info("OK")
+	//tokenManager := middleware.NewJWTManager(
+	//	cfg.Server.ExternalAPI.JWTSecrets,
+	//	cfg.Server.ExternalAPI.DefaultSessionTTL,
+	//	cache.Roles,
+	//)
 
-	// shortener service
-	//shortenerService := shortener.NewService(a.shortenerRepo, a.secure)
+	// getting services (use cases)
+	useCases := service.All{
+		User:    user.NewService(cfg, repo),
+		Secrets: secrets.NewService(cfg, repo),
+	}
 
 	// grpc server
-	//a.grpcServer = grpcserver.NewServer(shortenerService)
-	//go a.grpcServer.Run()
+	a.grpc = grpcserver.New(cfg, &useCases)
+	go a.grpc.Run()
+
+	slog.Info("the server is running (press CTRL+C to stop)")
 
 	// graceful shutdown
-	a.initGracefulShutdown()
-}
+	<-ctx.Done()
+	slog.Info("shutting down the server ...")
 
-func (a *app) initGracefulShutdown() {
-	idleConnsClosed := make(chan struct{})
-	sigint := make(chan os.Signal, 1)
-	signal.Notify(sigint, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
-	go func() {
-		sig := <-sigint
-		slog.Info("the stop signal has been received", slog.String("signal", sig.String()))
-		//a.grpcServer.Stop()
-		close(idleConnsClosed)
-	}()
-	// blocked until the stop signal
-	<-idleConnsClosed
-	// stopping services
-	//a.shortenerRepo.Stop()
-	// fin.
-	slog.Info("gophkeeper server stopped")
+	// ...
+
+	slog.Info("the server has been gracefully stopped")
 }

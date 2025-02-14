@@ -25,12 +25,14 @@ func upNewSecretsTable(ctx context.Context, tx *sql.Tx) error {
 		
 		CREATE TABLE IF NOT EXISTS gophkeeper.secrets
 		(
-			id         SERIAL PRIMARY KEY,
+			id         BIGSERIAL PRIMARY KEY,
+			name       VARCHAR(254) DEFAULT '',
 			data       BYTEA     NOT NULL,
+			size       INTEGER   NOT NULL,
+			created_at TIMESTAMP NOT NULL,
 			updated_at TIMESTAMP NOT NULL,
-			user_id    INTEGER   NOT NULL DEFAULT 0
+			user_id    BIGINT    NOT NULL REFERENCES gophkeeper.users (id) ON DELETE CASCADE
 		);
-		CREATE INDEX IF NOT EXISTS idx_user_id ON gophkeeper.secrets (user_id);
 	`)
 	if err != nil {
 		return err
@@ -41,7 +43,6 @@ func upNewSecretsTable(ctx context.Context, tx *sql.Tx) error {
 func downNewSecretsTable(ctx context.Context, tx *sql.Tx) error {
 	_, err := tx.Exec(`
 		DROP INDEX IF EXISTS idx_user_id;
-		DROP INDEX IF EXISTS idx_login;
 		DROP TABLE IF EXISTS gophkeeper.secrets;
 		DROP TABLE IF EXISTS gophkeeper.users;
 	`)
