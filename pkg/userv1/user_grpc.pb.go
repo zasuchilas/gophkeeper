@@ -8,7 +8,6 @@ package userv1
 
 import (
 	context "context"
-	empty "github.com/golang/protobuf/ptypes/empty"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -20,16 +19,16 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	UserV1_Register_FullMethodName = "/userv1.UserV1/Register"
-	UserV1_Login_FullMethodName    = "/userv1.UserV1/Login"
+	UserV1_Register_FullMethodName = "/api.UserV1/Register"
+	UserV1_Login_FullMethodName    = "/api.UserV1/Login"
 )
 
 // UserV1Client is the client API for UserV1 service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type UserV1Client interface {
-	Register(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*empty.Empty, error)
-	Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+	Register(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*RegisterResponse, error)
+	Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error)
 }
 
 type userV1Client struct {
@@ -40,9 +39,9 @@ func NewUserV1Client(cc grpc.ClientConnInterface) UserV1Client {
 	return &userV1Client{cc}
 }
 
-func (c *userV1Client) Register(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+func (c *userV1Client) Register(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*RegisterResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(empty.Empty)
+	out := new(RegisterResponse)
 	err := c.cc.Invoke(ctx, UserV1_Register_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -50,9 +49,9 @@ func (c *userV1Client) Register(ctx context.Context, in *RegisterRequest, opts .
 	return out, nil
 }
 
-func (c *userV1Client) Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+func (c *userV1Client) Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(empty.Empty)
+	out := new(LoginResponse)
 	err := c.cc.Invoke(ctx, UserV1_Login_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -64,8 +63,8 @@ func (c *userV1Client) Login(ctx context.Context, in *LoginRequest, opts ...grpc
 // All implementations must embed UnimplementedUserV1Server
 // for forward compatibility.
 type UserV1Server interface {
-	Register(context.Context, *RegisterRequest) (*empty.Empty, error)
-	Login(context.Context, *LoginRequest) (*empty.Empty, error)
+	Register(context.Context, *RegisterRequest) (*RegisterResponse, error)
+	Login(context.Context, *LoginRequest) (*LoginResponse, error)
 	mustEmbedUnimplementedUserV1Server()
 }
 
@@ -76,10 +75,10 @@ type UserV1Server interface {
 // pointer dereference when methods are called.
 type UnimplementedUserV1Server struct{}
 
-func (UnimplementedUserV1Server) Register(context.Context, *RegisterRequest) (*empty.Empty, error) {
+func (UnimplementedUserV1Server) Register(context.Context, *RegisterRequest) (*RegisterResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Register not implemented")
 }
-func (UnimplementedUserV1Server) Login(context.Context, *LoginRequest) (*empty.Empty, error) {
+func (UnimplementedUserV1Server) Login(context.Context, *LoginRequest) (*LoginResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Login not implemented")
 }
 func (UnimplementedUserV1Server) mustEmbedUnimplementedUserV1Server() {}
@@ -143,7 +142,7 @@ func _UserV1_Login_Handler(srv interface{}, ctx context.Context, dec func(interf
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var UserV1_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "userv1.UserV1",
+	ServiceName: "api.UserV1",
 	HandlerType: (*UserV1Server)(nil),
 	Methods: []grpc.MethodDesc{
 		{

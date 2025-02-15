@@ -14,9 +14,9 @@ func NewBuildInfo(version, date, commit string) *buildInfo {
 
 // buildInfo output build info.
 func (a *app) buildInfoOutput() {
-	slog.Info("Build info:")
-	slog.Info("* app: gophkeeper server")
-	slog.Info("* version: %s \n", a.build.version)
-	slog.Info("* date: %s \n", a.build.date)
-	slog.Info("* commit: %s \n", a.build.commit)
+	slog.Info("gophkeeper server",
+		slog.String("version", a.build.version),
+		slog.String("date", a.build.date),
+		slog.String("commit", a.build.commit),
+	)
 }

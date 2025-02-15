@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/zasuchilas/gophkeeper/internal/server/api/grpcserver"
 	"github.com/zasuchilas/gophkeeper/internal/server/config"
+	"github.com/zasuchilas/gophkeeper/internal/server/jwtmanager"
 	"github.com/zasuchilas/gophkeeper/internal/server/logger"
 	"github.com/zasuchilas/gophkeeper/internal/server/repository/pgsql"
 	"github.com/zasuchilas/gophkeeper/internal/server/service"
@@ -42,22 +43,18 @@ func (a *app) Run() {
 
 	// repository
 	repo := pgsql.MustInit(ctx, cfg.PostgreSQL)
-	_ = repo
 
-	//tokenManager := middleware.NewJWTManager(
-	//	cfg.Server.ExternalAPI.JWTSecrets,
-	//	cfg.Server.ExternalAPI.DefaultSessionTTL,
-	//	cache.Roles,
-	//)
+	// jwt
+	jwtManager := jwtmanager.New(cfg)
 
 	// getting services (use cases)
 	useCases := service.All{
-		User:    user.NewService(cfg, repo),
+		User:    user.NewService(cfg, repo, jwtManager),
 		Secrets: secrets.NewService(cfg, repo),
 	}
 
 	// grpc server
-	a.grpc = grpcserver.New(cfg, &useCases)
+	a.grpc = grpcserver.New(cfg, &useCases, jwtManager)
 	go a.grpc.Run()
 
 	slog.Info("the server is running (press CTRL+C to stop)")

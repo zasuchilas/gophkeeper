@@ -1,5 +1,10 @@
+app: gophkeeper
 env: local
 postgresql:
   dsn: "postgres://gophkeeper:pass@localhost:9998/gophkeeper?sslmode=disable"
 grpc_server:
   address: localhost:9999
+jwt:
+  secrets:
+    - ABCDEFG_0123456789
+  session_ttl: 24h

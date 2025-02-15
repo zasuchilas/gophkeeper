@@ -3,10 +3,13 @@ package external
 import (
 	"context"
 	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/zasuchilas/gophkeeper/internal/server/api/helper"
+	"github.com/zasuchilas/gophkeeper/internal/server/jwtmanager"
 	"github.com/zasuchilas/gophkeeper/internal/server/model"
 	"github.com/zasuchilas/gophkeeper/internal/server/service"
 	desc "github.com/zasuchilas/gophkeeper/pkg/secretsv1"
 	"google.golang.org/protobuf/types/known/timestamppb"
+	"log/slog"
 	"time"
 )
 
@@ -32,6 +35,12 @@ func NewSecretsAPI(useCases *service.All) *SecretsAPI {
 
 func (i *SecretsAPI) List(ctx context.Context, in *desc.ListSecretsRequest) (*desc.ListSecretsResponse, error) {
 
+	claims, err := jwtmanager.GetClaims(ctx)
+	if err != nil {
+		return nil, helper.ErrorToGRPC(err)
+	}
+
+	slog.Info("REQUEST (api level logging)", slog.Int64("UserID", claims.ID))
 	return nil, nil
 }
 

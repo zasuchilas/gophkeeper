@@ -20,11 +20,11 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	SecretsV1_List_FullMethodName   = "/secretsv1.SecretsV1/List"
-	SecretsV1_Get_FullMethodName    = "/secretsv1.SecretsV1/Get"
-	SecretsV1_Create_FullMethodName = "/secretsv1.SecretsV1/Create"
-	SecretsV1_Update_FullMethodName = "/secretsv1.SecretsV1/Update"
-	SecretsV1_Delete_FullMethodName = "/secretsv1.SecretsV1/Delete"
+	SecretsV1_List_FullMethodName   = "/api.SecretsV1/List"
+	SecretsV1_Get_FullMethodName    = "/api.SecretsV1/Get"
+	SecretsV1_Create_FullMethodName = "/api.SecretsV1/Create"
+	SecretsV1_Update_FullMethodName = "/api.SecretsV1/Update"
+	SecretsV1_Delete_FullMethodName = "/api.SecretsV1/Delete"
 )
 
 // SecretsV1Client is the client API for SecretsV1 service.
@@ -245,7 +245,7 @@ func _SecretsV1_Delete_Handler(srv interface{}, ctx context.Context, dec func(in
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var SecretsV1_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "secretsv1.SecretsV1",
+	ServiceName: "api.SecretsV1",
 	HandlerType: (*SecretsV1Server)(nil),
 	Methods: []grpc.MethodDesc{
 		{
