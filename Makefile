@@ -1,6 +1,17 @@
 run:
 	@CONFIG_PATH=config/local.yml go run ./cmd/server
 
+cli:
+	@go run ./cmd/client
+
+cli_port:
+	@go run ./cmd/client -s localhost:9999
+
+
+
+# ---------------------------------------------------------------------------------------------------------------------
+# db migrations by goose
+
 goose_create:
 	@read -p "Enter migration name: " MIGRATION_NAME; \
 	goose -dir db/server/migrations create "$$MIGRATION_NAME" go
@@ -14,6 +25,9 @@ goose_up:
 
 goose_down:
 	@goose -dir db/server/migrations postgres "postgresql://gophkeeper:pass@127.0.0.1:9998/gophkeeper?sslmode=disable" down
+
+# ---------------------------------------------------------------------------------------------------------------------
+# grpc develop
 
 LOCAL_BIN:=$(CURDIR)/bin
 install-deps:
