@@ -20,5 +20,11 @@ func (b *buildInfo) String() string {
 	if b.version != "" {
 		version = "ver. " + b.version
 	}
-	return strings.TrimSpace(fmt.Sprintf("%s %s %s", version, b.date, b.commit))
+
+	var commit string
+	if len(b.commit) > 8 {
+		commit = b.commit[:8]
+	}
+
+	return strings.TrimSpace(fmt.Sprintf("%s %s %s", version, b.date, commit))
 }

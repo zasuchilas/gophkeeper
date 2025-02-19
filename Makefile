@@ -81,5 +81,12 @@ clean_test_cache:
 # build
 
 build_client_linux:
-	@cd ./cmd/client/ && GOOS=linux GOARCH=amd64 go build -ldflags "-X main.buildVersion=$(git describe --tags --abbrev=0) -X 'main.buildDate=$(date +'%Y.%m.%d %H:%M:%S')' -X main.buildCommit=$(git rev-parse HEAD)" -o gophkeeper-linux-amd64
+	#@cd ./cmd/client/ && GOOS=linux GOARCH=amd64 go build -ldflags "-X main.buildVersion=$(git describe --tags --abbrev=0) -X 'main.buildDate=$(date +'%Y.%m.%d %H:%M:%S')' -X main.buildCommit=$(git rev-parse HEAD)" -o gophkeeper_linux_amd64
+	# GOOS=linux GOARCH=amd64 go build -ldflags "-X main.buildVersion=$(git describe --tags --abbrev=0) -X 'main.buildDate=$(date +'%Y.%m.%d %H:%M:%S')' -X main.buildCommit=$(git rev-parse HEAD)" -o gophkeeper_linux_amd64
 
+build_client_windows:
+	# GOOS=windows GOARCH=amd64 go build -ldflags "-X main.buildVersion=$(git describe --tags --abbrev=0) -X 'main.buildDate=$(date +'%Y.%m.%d %H:%M:%S')' -X main.buildCommit=$(git rev-parse HEAD)" -o gophkeeper_windows_amd64
+
+build_client_darwin:
+	# GOOS=darwin GOARCH=amd64 go build -ldflags "-X main.buildVersion=$(git describe --tags --abbrev=0) -X 'main.buildDate=$(date +'%Y.%m.%d %H:%M:%S')' -X main.buildCommit=$(git rev-parse HEAD)" -o gophkeeper_darwin_amd64
+	# GOOS=darwin GOARCH=arm64 go build -ldflags "-X main.buildVersion=$(git describe --tags --abbrev=0) -X 'main.buildDate=$(date +'%Y.%m.%d %H:%M:%S')' -X main.buildCommit=$(git rev-parse HEAD)" -o gophkeeper_darwin_arm64
