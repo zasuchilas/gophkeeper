@@ -35,7 +35,7 @@ func (s CreateLogoPassScreen) Update(msg tea.Msg) (State, tea.Cmd) {
 
 func (s CreateLogoPassScreen) View() string {
 	scr := component.NewScreenView()
-	scr.SetHeader()
+	scr.SetAppHeader()
 
 	body := fmt.Sprintf("CREATE SECRET SCREEN %s", "")
 	scr.SetBody(body)

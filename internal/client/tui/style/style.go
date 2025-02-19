@@ -3,8 +3,14 @@ package style
 import "github.com/charmbracelet/lipgloss"
 
 var (
-	Header = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("#FAFAFA"))
-	Help   = lipgloss.NewStyle().Foreground(lipgloss.Color("240"))
+	Header = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("#FAFAFA")).
+		BorderStyle(lipgloss.NormalBorder()).
+		BorderForeground(lipgloss.Color("#FAFAFA")).
+		BorderTop(true).
+		BorderBottom(true).
+		Bold(false)
+	Title = lipgloss.NewStyle().Bold(true)
+	Help  = lipgloss.NewStyle().Foreground(lipgloss.Color("240"))
 
 	NoStyle = lipgloss.NewStyle()
 	Focused = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))

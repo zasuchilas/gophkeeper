@@ -56,8 +56,6 @@ func (s AuthScreen) Update(msg tea.Msg) (State, tea.Cmd) {
 	case tea.KeyMsg:
 		k := msg.String()
 		switch k {
-		case KeyListScreen:
-			return NewListScreen(), nil
 		case KeyAuthSwitch:
 			s.action = s.getNextAction()
 			return s, nil
@@ -126,7 +124,14 @@ func (s AuthScreen) Update(msg tea.Msg) (State, tea.Cmd) {
 
 func (s AuthScreen) View() string {
 	scr := component.NewScreenView()
-	scr.SetHeader()
+	scr.SetAppHeader()
+
+	switch s.action {
+	case ActionAuthLogin:
+		scr.SetScreenHeader("LOGIN", "Log in to the app.")
+	case ActionAuthRegister:
+		scr.SetScreenHeader("REGISTER", "Register in the app.")
+	}
 
 	var b strings.Builder
 
@@ -135,12 +140,6 @@ func (s AuthScreen) View() string {
 		scr.SetBody(b.String())
 		scr.SetFooter(nil)
 		return scr.String()
-	}
-
-	if s.action == ActionAuthLogin {
-		b.WriteString("Log in to the app:\n")
-	} else {
-		b.WriteString("Register in the app:\n")
 	}
 
 	for i := range s.inputs {
@@ -160,7 +159,6 @@ func (s AuthScreen) View() string {
 
 	nextAction := s.getNextAction()
 	cmd := []component.PressItem{
-		{KeyListScreen, "secrets"},
 		{KeyAuthSwitch, nextAction},
 		//{KeyCtrl + nextAction[:1], nextAction},
 	}

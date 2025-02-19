@@ -36,8 +36,6 @@ func (s ListScreen) Update(msg tea.Msg) (State, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
-		case KeyAuthScreen:
-			return NewAuthScreen(), nil
 		case KeyItemScreen:
 			return NewLogoPassItemScreen(), nil
 		case KeyCreateScreen:
@@ -59,17 +57,14 @@ func (s ListScreen) Update(msg tea.Msg) (State, tea.Cmd) {
 
 func (s ListScreen) View() string {
 	scr := component.NewScreenView()
-	scr.SetHeader()
+	scr.SetAppHeader()
+	scr.SetScreenHeader("YOUR SECRETS", fmt.Sprintf("You have %d of them.", 15))
 
 	var b strings.Builder
-
-	b.WriteString(fmt.Sprintf("You secrets (%d items):\n", 15))
-	b.WriteString(style.TableBase.Render(s.table.View()) + "\n")
-
+	b.WriteString(style.TableBase.Render(s.table.View()))
 	scr.SetBody(b.String())
 
 	cmd := []component.PressItem{
-		{KeyAuthScreen, "auth screen"},
 		{KeyListUpdate, "update list"},
 		{KeyCreateScreen, "create"},
 		{KeyItemScreen, "secret item"},

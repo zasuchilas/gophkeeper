@@ -7,9 +7,10 @@ import (
 )
 
 type ScreenView struct {
-	header string
-	body   string
-	footer string
+	appHeader    string
+	screenHeader string
+	body         string
+	footer       string
 }
 
 func NewScreenView() *ScreenView {
@@ -18,17 +19,36 @@ func NewScreenView() *ScreenView {
 
 func (scr *ScreenView) String() string {
 	var b strings.Builder
-	b.WriteString(scr.header)
+	b.WriteString(scr.appHeader)
+	b.WriteString(scr.screenHeader)
 	b.WriteString(scr.body)
 	b.WriteString(scr.footer)
 	return b.String()
 }
 
-func (scr *ScreenView) SetHeader() {
+func (scr *ScreenView) SetAppHeader() {
 	var b strings.Builder
 	b.WriteString(style.Header.Render("gophkeeper cli v1.0.0"))
 	b.WriteRune('\n')
-	scr.header = b.String()
+	scr.appHeader = b.String()
+}
+
+func (scr *ScreenView) SetScreenHeader(title, subtitle string) {
+	var b strings.Builder
+
+	// title
+	if title != "" {
+		b.WriteString(style.Title.Render(title))
+		b.WriteRune(' ')
+	}
+
+	// subtitle
+	if subtitle != "" {
+		b.WriteString(subtitle)
+		b.WriteRune('\n')
+	}
+
+	scr.screenHeader = b.String()
 }
 
 func (scr *ScreenView) SetBody(data string) {

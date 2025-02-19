@@ -46,7 +46,7 @@ func (s LogoPassItemScreen) Update(msg tea.Msg) (State, tea.Cmd) {
 
 func (s LogoPassItemScreen) View() string {
 	scr := component.NewScreenView()
-	scr.SetHeader()
+	scr.SetAppHeader()
 
 	body := fmt.Sprintf("SECRET ITEM SCREEN\nLOGIN: %s PASSWORD: %s",
 		s.secretData.Login, s.secretData.Password)

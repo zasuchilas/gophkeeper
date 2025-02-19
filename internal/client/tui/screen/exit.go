@@ -14,12 +14,12 @@ func NewExitScreen() ExitScreen {
 }
 
 func (s ExitScreen) Update(msg tea.Msg) (State, tea.Cmd) {
-	return s, nil
+	return s, tea.Quit
 }
 
 func (s ExitScreen) View() string {
 	scr := component.NewScreenView()
-	scr.SetHeader()
+	scr.SetAppHeader()
 
 	body := "Good luck!"
 	scr.SetBody(body)
