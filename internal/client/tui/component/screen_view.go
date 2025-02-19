@@ -2,6 +2,7 @@ package component
 
 import (
 	"fmt"
+	"github.com/zasuchilas/gophkeeper/internal/client/config"
 	"github.com/zasuchilas/gophkeeper/internal/client/tui/style"
 	"strings"
 )
@@ -28,7 +29,7 @@ func (scr *ScreenView) String() string {
 
 func (scr *ScreenView) SetAppHeader() {
 	var b strings.Builder
-	b.WriteString(style.Header.Render("gophkeeper cli v1.0.0"))
+	b.WriteString(style.Header.Render("gophkeeper cli " + config.BuildInfo))
 	b.WriteRune('\n')
 	scr.appHeader = b.String()
 }

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/zasuchilas/gophkeeper/internal/server/config"
 	"github.com/zasuchilas/gophkeeper/internal/server/jwtmanager"
+	"github.com/zasuchilas/gophkeeper/internal/server/logger"
 	"github.com/zasuchilas/gophkeeper/internal/server/model"
 	"github.com/zasuchilas/gophkeeper/pkg/passhash"
 	"log/slog"
@@ -62,7 +63,7 @@ func (s *Service) Login(ctx context.Context, item *model.User) (string, error) {
 		if errors.Is(err, model.ErrNotFound) {
 			return "", fmt.Errorf("login failed: %w", model.ErrBadLoginPass)
 		}
-		slog.Error("login error: %s", err.Error())
+		slog.Error("login error", logger.Err(err))
 		return "", fmt.Errorf("login failed: something went wrong")
 	}
 

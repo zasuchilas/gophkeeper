@@ -67,3 +67,19 @@ generate-secrets-api:
 	--go-grpc_out=pkg/secretsv1 --go-grpc_opt=paths=source_relative \
 	--plugin=protoc-gen-go-grpc=bin/protoc-gen-go-grpc \
 	api/secretsv1/secrets.proto
+
+
+# test
+
+test:
+	@go test -v ./...
+
+clean_test_cache:
+	@go clean -testcache
+
+
+# build
+
+build_client_linux:
+	@cd ./cmd/client/ && GOOS=linux GOARCH=amd64 go build -ldflags "-X main.buildVersion=$(git describe --tags --abbrev=0) -X 'main.buildDate=$(date +'%Y.%m.%d %H:%M:%S')' -X main.buildCommit=$(git rev-parse HEAD)" -o gophkeeper-linux-amd64
+

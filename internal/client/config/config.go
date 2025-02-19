@@ -14,6 +14,9 @@ var (
 
 	// Config is config filename.
 	Config string
+
+	// BuildInfo _
+	BuildInfo string
 )
 
 func ParseFlags() {

@@ -9,16 +9,21 @@ import (
 	"syscall"
 )
 
-type app struct{}
+type app struct {
+	build *buildInfo
+}
 
-func New() *app {
-	return &app{}
+func New(buildVersion, buildDate, buildCommit string) *app {
+	return &app{
+		build: NewBuildInfo(buildVersion, buildDate, buildCommit),
+	}
 }
 
 func (a *app) Run() {
 
 	// config
 	config.ParseFlags()
+	config.BuildInfo = a.build.String()
 
 	// app context
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)

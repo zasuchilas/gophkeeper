@@ -47,7 +47,11 @@ func (s AuthScreen) Update(msg tea.Msg) (State, tea.Cmd) {
 	switch msg := msg.(type) {
 
 	case statusMsg:
-		return NewListScreen(), nil
+		next := NewListScreen()
+		return next, tea.Batch(
+			next.spinner.Tick,
+			next.list,
+		)
 	case errMsg:
 		s.err = msg
 		s.loading = false

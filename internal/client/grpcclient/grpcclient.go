@@ -5,10 +5,12 @@ import (
 	"fmt"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/zasuchilas/gophkeeper/internal/client/config"
+	"github.com/zasuchilas/gophkeeper/internal/client/model"
 	"github.com/zasuchilas/gophkeeper/pkg/secretsv1"
 	"github.com/zasuchilas/gophkeeper/pkg/userv1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/metadata"
 	"time"
 )
 
@@ -90,9 +92,35 @@ func (s *service) Login(login, password string) error {
 	return nil
 }
 
-func (s *service) GetSecretList() (string, error) {
+func (s *service) GetSecretList() ([]model.ListSecretItem, error) {
 
-	return "", nil
+	ctx, cancel := context.WithTimeout(s.setAccessTokenInCtx(s.ctx), 3*time.Second)
+	defer cancel()
+
+	in := secretsv1.ListSecretsRequest{
+		Limit: 100,
+	}
+	resp, err := s.secretsClient.List(ctx, &in)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(resp.Items) == 0 {
+		return nil, nil
+	}
+
+	items := make([]model.ListSecretItem, len(resp.Items))
+	for i := range resp.Items {
+		items[i] = model.ListSecretItem{
+			ID:         resp.Items[i].Id,
+			Name:       resp.Items[i].Name,
+			Size:       resp.Items[i].Size,
+			SecretType: resp.Items[i].SecretType.String(),
+			UpdatedAt:  resp.Items[i].UpdatedAt.AsTime(),
+		}
+	}
+
+	return items, nil
 }
 
 func (s *service) isAuthorized() bool {
@@ -101,4 +129,9 @@ func (s *service) isAuthorized() bool {
 
 func (s *service) writeAccessToken(jwt string) {
 	s.jwt = jwt
+}
+
+func (s *service) setAccessTokenInCtx(ctx context.Context) context.Context {
+	md := metadata.New(map[string]string{"authorization": s.jwt})
+	return metadata.NewOutgoingContext(ctx, md)
 }
