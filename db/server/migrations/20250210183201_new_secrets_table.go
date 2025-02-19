@@ -11,9 +11,8 @@ func init() {
 }
 
 func upNewSecretsTable(ctx context.Context, tx *sql.Tx) error {
-	_, err := tx.Exec(`
-		CREATE SCHEMA IF NOT EXISTS gophkeeper;
-		
+	_, err := tx.Exec(`CREATE SCHEMA IF NOT EXISTS gophkeeper;
+
 		CREATE TABLE IF NOT EXISTS gophkeeper.users
 		(
 			id         SERIAL PRIMARY KEY,
@@ -25,13 +24,14 @@ func upNewSecretsTable(ctx context.Context, tx *sql.Tx) error {
 		
 		CREATE TABLE IF NOT EXISTS gophkeeper.secrets
 		(
-			id         BIGSERIAL PRIMARY KEY,
-			name       VARCHAR(254) DEFAULT '',
-			data       BYTEA     NOT NULL,
-			size       INTEGER   NOT NULL,
-			created_at TIMESTAMP NOT NULL,
-			updated_at TIMESTAMP NOT NULL,
-			user_id    BIGINT    NOT NULL REFERENCES gophkeeper.users (id) ON DELETE CASCADE
+			id          BIGSERIAL PRIMARY KEY,
+			name        VARCHAR(254) DEFAULT '',
+			data        BYTEA        NOT NULL,
+			size        INTEGER      NOT NULL,
+			secret_type VARCHAR(100) NOT NULL,
+			created_at  TIMESTAMP    NOT NULL,
+			updated_at  TIMESTAMP    NOT NULL,
+			user_id     BIGINT       NOT NULL REFERENCES gophkeeper.users (id) ON DELETE CASCADE
 		);
 	`)
 	if err != nil {

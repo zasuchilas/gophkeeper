@@ -32,9 +32,9 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type SecretsV1Client interface {
 	List(ctx context.Context, in *ListSecretsRequest, opts ...grpc.CallOption) (*ListSecretsResponse, error)
-	Get(ctx context.Context, in *SecretRequest, opts ...grpc.CallOption) (*GetSecretResponse, error)
+	Get(ctx context.Context, in *SecretRequest, opts ...grpc.CallOption) (*Secret, error)
 	Create(ctx context.Context, in *CreateSecretRequest, opts ...grpc.CallOption) (*CreateSecretResponse, error)
-	Update(ctx context.Context, in *UpdateSecretRequest, opts ...grpc.CallOption) (*UpdateSecretResponse, error)
+	Update(ctx context.Context, in *UpdateSecretRequest, opts ...grpc.CallOption) (*Secret, error)
 	Delete(ctx context.Context, in *SecretRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 }
 
@@ -56,9 +56,9 @@ func (c *secretsV1Client) List(ctx context.Context, in *ListSecretsRequest, opts
 	return out, nil
 }
 
-func (c *secretsV1Client) Get(ctx context.Context, in *SecretRequest, opts ...grpc.CallOption) (*GetSecretResponse, error) {
+func (c *secretsV1Client) Get(ctx context.Context, in *SecretRequest, opts ...grpc.CallOption) (*Secret, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetSecretResponse)
+	out := new(Secret)
 	err := c.cc.Invoke(ctx, SecretsV1_Get_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -76,9 +76,9 @@ func (c *secretsV1Client) Create(ctx context.Context, in *CreateSecretRequest, o
 	return out, nil
 }
 
-func (c *secretsV1Client) Update(ctx context.Context, in *UpdateSecretRequest, opts ...grpc.CallOption) (*UpdateSecretResponse, error) {
+func (c *secretsV1Client) Update(ctx context.Context, in *UpdateSecretRequest, opts ...grpc.CallOption) (*Secret, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(UpdateSecretResponse)
+	out := new(Secret)
 	err := c.cc.Invoke(ctx, SecretsV1_Update_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -101,9 +101,9 @@ func (c *secretsV1Client) Delete(ctx context.Context, in *SecretRequest, opts ..
 // for forward compatibility.
 type SecretsV1Server interface {
 	List(context.Context, *ListSecretsRequest) (*ListSecretsResponse, error)
-	Get(context.Context, *SecretRequest) (*GetSecretResponse, error)
+	Get(context.Context, *SecretRequest) (*Secret, error)
 	Create(context.Context, *CreateSecretRequest) (*CreateSecretResponse, error)
-	Update(context.Context, *UpdateSecretRequest) (*UpdateSecretResponse, error)
+	Update(context.Context, *UpdateSecretRequest) (*Secret, error)
 	Delete(context.Context, *SecretRequest) (*empty.Empty, error)
 	mustEmbedUnimplementedSecretsV1Server()
 }
@@ -118,13 +118,13 @@ type UnimplementedSecretsV1Server struct{}
 func (UnimplementedSecretsV1Server) List(context.Context, *ListSecretsRequest) (*ListSecretsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method List not implemented")
 }
-func (UnimplementedSecretsV1Server) Get(context.Context, *SecretRequest) (*GetSecretResponse, error) {
+func (UnimplementedSecretsV1Server) Get(context.Context, *SecretRequest) (*Secret, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
 }
 func (UnimplementedSecretsV1Server) Create(context.Context, *CreateSecretRequest) (*CreateSecretResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Create not implemented")
 }
-func (UnimplementedSecretsV1Server) Update(context.Context, *UpdateSecretRequest) (*UpdateSecretResponse, error) {
+func (UnimplementedSecretsV1Server) Update(context.Context, *UpdateSecretRequest) (*Secret, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Update not implemented")
 }
 func (UnimplementedSecretsV1Server) Delete(context.Context, *SecretRequest) (*empty.Empty, error) {

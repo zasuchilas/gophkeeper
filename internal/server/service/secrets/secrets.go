@@ -2,6 +2,7 @@ package secrets
 
 import (
 	"context"
+	"fmt"
 	"github.com/brianvoe/gofakeit/v7"
 	"github.com/zasuchilas/gophkeeper/internal/server/config"
 	"github.com/zasuchilas/gophkeeper/internal/server/model"
@@ -9,11 +10,11 @@ import (
 
 //go:generate mockery --name Repository
 type Repository interface {
-	GetSecrets(ctx context.Context, filters *model.SecretFilters) ([]model.Secret, error)
+	GetSecrets(ctx context.Context, userID int64, filters *model.SecretFilters) ([]*model.Secret, error)
 	CreateSecret(ctx context.Context, item *model.Secret) (*model.Secret, error)
-	GetSecret(ctx context.Context, id int64) (*model.Secret, error)
-	UpdateSecret(ctx context.Context, item *model.Secret) (*model.Secret, error)
-	DeleteSecret(ctx context.Context, id int64) error
+	GetSecret(ctx context.Context, userID, id int64) (*model.Secret, error)
+	UpdateSecret(ctx context.Context, userID int64, item *model.Secret) (*model.Secret, error)
+	DeleteSecret(ctx context.Context, userID, id int64) error
 }
 
 type Service struct {
@@ -28,9 +29,11 @@ func NewService(cfg *config.Config, repo Repository) *Service {
 	}
 }
 
-func (s *Service) List(ctx context.Context, filters *model.SecretFilters) ([]model.Secret, error) {
+func (s *Service) List(ctx context.Context, userID int64, filters *model.SecretFilters) ([]*model.Secret, error) {
 
-	result, err := s.repo.GetSecrets(ctx, filters)
+	filters.Limit = 100
+
+	result, err := s.repo.GetSecrets(ctx, userID, filters)
 	if err != nil {
 		return nil, err
 	}
@@ -38,17 +41,19 @@ func (s *Service) List(ctx context.Context, filters *model.SecretFilters) ([]mod
 	return result, nil
 }
 
-func (s *Service) Get(ctx context.Context, id int64) (*model.Secret, error) {
-	return s.repo.GetSecret(ctx, id)
-}
+func (s *Service) Create(ctx context.Context, userID int64, item *model.Secret) (*model.Secret, error) {
 
-func (s *Service) Create(ctx context.Context, item *model.Secret) (*model.Secret, error) {
+	item.UserID = userID
 
-	item.UserID = 1
-	item.Size = int64(len(item.Data))
 	if item.Name == "" {
-		item.Name = gofakeit.CelebrityActor() + ": " + gofakeit.Phrase()
+		item.Name = gofakeit.CelebrityActor()
 	}
+
+	if item.Data == nil {
+		return nil, fmt.Errorf("data is required: %w", model.ErrBadParams)
+	}
+
+	item.Size = int64(len(item.Data))
 
 	result, err := s.repo.CreateSecret(ctx, item)
 	if err != nil {
@@ -58,11 +63,15 @@ func (s *Service) Create(ctx context.Context, item *model.Secret) (*model.Secret
 	return result, nil
 }
 
-func (s *Service) Update(ctx context.Context, item *model.Secret) (*model.Secret, error) {
+func (s *Service) Get(ctx context.Context, userID, id int64) (*model.Secret, error) {
+	return s.repo.GetSecret(ctx, userID, id)
+}
+
+func (s *Service) Update(ctx context.Context, userID int64, item *model.Secret) (*model.Secret, error) {
 
 	item.Size = int64(len(item.Data))
 
-	result, err := s.repo.UpdateSecret(ctx, item)
+	result, err := s.repo.UpdateSecret(ctx, userID, item)
 	if err != nil {
 		return nil, err
 	}
@@ -70,9 +79,9 @@ func (s *Service) Update(ctx context.Context, item *model.Secret) (*model.Secret
 	return result, nil
 }
 
-func (s *Service) Delete(ctx context.Context, id int64) error {
+func (s *Service) Delete(ctx context.Context, userID, id int64) error {
 
-	err := s.repo.DeleteSecret(ctx, id)
+	err := s.repo.DeleteSecret(ctx, userID, id)
 	if err != nil {
 		return err
 	}

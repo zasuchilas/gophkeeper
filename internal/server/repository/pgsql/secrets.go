@@ -10,30 +10,40 @@ import (
 )
 
 // GetSecrets returns a slice of Secrets, respecting the given limit and offset.
-func (r *Repository) GetSecrets(ctx context.Context, filters *model.SecretFilters) ([]model.Secret, error) {
-	var result []model.Secret
-	userID := 1
+func (r *Repository) GetSecrets(ctx context.Context, userID int64, filters *model.SecretFilters) ([]*model.Secret, error) {
+	var result []*model.Secret
 
-	err := sqlx.Get(r.db, &result, `
+	filters.UserID = userID
+
+	query, args, err := sqlx.BindNamed(sqlx.DOLLAR, `
 		SELECT
 			*
 		FROM
 			gophkeeper.secrets
 		WHERE
-			user_id = $1
-		LIMIT $2
-		OFFSET $3
-	`, userID, filters.Limit, filters.Offset)
+			user_id = :user_id
+		LIMIT :limit
+		OFFSET :offset
+	`, filters)
 
 	if err != nil {
-		return nil, fmt.Errorf("unable to process select: %w", err)
+		return nil, fmt.Errorf("unable to build named query: %w", err)
+	}
+
+	err = sqlx.Select(r.db, &result, query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("unable to process SELECT: %w", err)
+	}
+
+	if len(result) == 0 {
+		return nil, model.ErrNotFound
 	}
 
 	return result, nil
 }
 
 // GetSecret returns the Secret for the given id.
-func (r *Repository) GetSecret(ctx context.Context, id int64) (*model.Secret, error) {
+func (r *Repository) GetSecret(ctx context.Context, userID, id int64) (*model.Secret, error) {
 	var result model.Secret
 
 	err := sqlx.Get(r.db, &result, `
@@ -42,8 +52,8 @@ func (r *Repository) GetSecret(ctx context.Context, id int64) (*model.Secret, er
 		FROM
 			gophkeeper.secrets
 		WHERE
-			id = $1
-	`, id)
+			id = $1 AND user_id = $2
+	`, id, userID)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, model.ErrNotFound
@@ -66,14 +76,16 @@ func (r *Repository) CreateSecret(ctx context.Context, item *model.Secret) (*mod
 		  name,
 		  data,
 		  size,
+		  secret_type,
 			created_at,
 			updated_at,
 			user_id
-		) values ($1, $2, $3, $4, $5, $6)
+		) values ($1, $2, $3, $4, $5, $6, $7)
 		returning id`,
 		item.Name,
 		item.Data,
 		item.Size,
+		item.SecretType,
 		item.CreatedAt,
 		item.UpdatedAt,
 		item.UserID,
@@ -86,23 +98,26 @@ func (r *Repository) CreateSecret(ctx context.Context, item *model.Secret) (*mod
 }
 
 // UpdateSecret updates the given Secret.
-func (r *Repository) UpdateSecret(ctx context.Context, item *model.Secret) (*model.Secret, error) {
+func (r *Repository) UpdateSecret(ctx context.Context, userID int64, item *model.Secret) (*model.Secret, error) {
 
 	item.UpdatedAt = time.Now().UTC()
 
 	res, err := r.db.Exec(`
 		UPDATE gophkeeper.secrets
 		SET 
-			name = $2,
-		  data = $3,
-		  size = $4,
-			updated_at = $5
+			name = $3,
+		  data = $4,
+		  size = $5,
+		  secret_type = $6,
+			updated_at = $7
 		WHERE
-		  id = $1`,
+		  id = $1 AND user_id = $2`,
 		item.ID,
+		userID,
 		item.Name,
 		item.Data,
 		item.Size,
+		item.SecretType,
 		item.UpdatedAt,
 	)
 
@@ -121,13 +136,13 @@ func (r *Repository) UpdateSecret(ctx context.Context, item *model.Secret) (*mod
 }
 
 // DeleteSecret deletes the Secret record matching the given ID.
-func (r *Repository) DeleteSecret(ctx context.Context, id int64) error {
+func (r *Repository) DeleteSecret(ctx context.Context, userID, id int64) error {
 	res, err := r.db.Exec(`
 		DELETE FROM
 			gophkeeper.secrets
 		WHERE
-			id = $1
-	`, id)
+			id = $1 AND user_id = $2
+	`, id, userID)
 	if err != nil {
 		return checkError(err)
 	}

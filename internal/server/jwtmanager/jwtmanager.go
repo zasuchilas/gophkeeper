@@ -90,6 +90,9 @@ func (j *jwtManager) Verify(accessToken string) (*model.AuthClaims, error) {
 }
 
 func GetClaims(ctx context.Context) (*model.AuthClaims, error) {
+	if ctx == nil {
+		return nil, fmt.Errorf("context is missing")
+	}
 	claims, ok := ctx.Value("claims").(*model.AuthClaims)
 	if !ok {
 		return nil, model.ErrNoClaims
