@@ -1,15 +1,33 @@
 run:
 	@CONFIG_PATH=config/local.yml go run ./cmd/server
 
-goose_up:
-	@goose -dir db//migrations postgres "postgresql://gophkeeper:pass@127.0.0.1:9998/gophkeeper?sslmode=disable" up
+cli:
+	@go run ./cmd/client
 
-goose_down:
-	@goose -dir db//migrations postgres "postgresql://gophkeeper:pass@127.0.0.1:9998/gophkeeper?sslmode=disable" down
+cli_port:
+	@go run ./cmd/client -s localhost:9999
+
+
+
+# ---------------------------------------------------------------------------------------------------------------------
+# db migrations by goose
 
 goose_create:
 	@read -p "Enter migration name: " MIGRATION_NAME; \
-	goose -dir db/migrations create "$$MIGRATION_NAME" go
+	goose -dir db/server/migrations create "$$MIGRATION_NAME" go
+
+goose_create_sql:
+	@read -p "Enter migration name: " MIGRATION_NAME; \
+	goose -dir db/server/migrations create "$$MIGRATION_NAME" sql
+
+goose_up:
+	@goose -dir db/server/migrations postgres "postgresql://gophkeeper:pass@127.0.0.1:9998/gophkeeper?sslmode=disable" up
+
+goose_down:
+	@goose -dir db/server/migrations postgres "postgresql://gophkeeper:pass@127.0.0.1:9998/gophkeeper?sslmode=disable" down
+
+# ---------------------------------------------------------------------------------------------------------------------
+# grpc develop
 
 LOCAL_BIN:=$(CURDIR)/bin
 install-deps:
@@ -49,3 +67,26 @@ generate-secrets-api:
 	--go-grpc_out=pkg/secretsv1 --go-grpc_opt=paths=source_relative \
 	--plugin=protoc-gen-go-grpc=bin/protoc-gen-go-grpc \
 	api/secretsv1/secrets.proto
+
+
+# test
+
+test:
+	@go test -v ./...
+
+clean_test_cache:
+	@go clean -testcache
+
+
+# build
+
+build_client_linux:
+	#@cd ./cmd/client/ && GOOS=linux GOARCH=amd64 go build -ldflags "-X main.buildVersion=$(git describe --tags --abbrev=0) -X 'main.buildDate=$(date +'%Y.%m.%d %H:%M:%S')' -X main.buildCommit=$(git rev-parse HEAD)" -o gophkeeper_linux_amd64
+	# GOOS=linux GOARCH=amd64 go build -ldflags "-X main.buildVersion=$(git describe --tags --abbrev=0) -X 'main.buildDate=$(date +'%Y.%m.%d %H:%M:%S')' -X main.buildCommit=$(git rev-parse HEAD)" -o gophkeeper_linux_amd64
+
+build_client_windows:
+	# GOOS=windows GOARCH=amd64 go build -ldflags "-X main.buildVersion=$(git describe --tags --abbrev=0) -X 'main.buildDate=$(date +'%Y.%m.%d %H:%M:%S')' -X main.buildCommit=$(git rev-parse HEAD)" -o gophkeeper_windows_amd64
+
+build_client_darwin:
+	# GOOS=darwin GOARCH=amd64 go build -ldflags "-X main.buildVersion=$(git describe --tags --abbrev=0) -X 'main.buildDate=$(date +'%Y.%m.%d %H:%M:%S')' -X main.buildCommit=$(git rev-parse HEAD)" -o gophkeeper_darwin_amd64
+	# GOOS=darwin GOARCH=arm64 go build -ldflags "-X main.buildVersion=$(git describe --tags --abbrev=0) -X 'main.buildDate=$(date +'%Y.%m.%d %H:%M:%S')' -X main.buildCommit=$(git rev-parse HEAD)" -o gophkeeper_darwin_arm64

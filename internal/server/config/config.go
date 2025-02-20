@@ -4,12 +4,15 @@ import (
 	"github.com/ilyakaznacheev/cleanenv"
 	"log"
 	"os"
+	"time"
 )
 
 type Config struct {
+	App        string `yaml:"app" env-default:"gophkeeper"`
 	Env        string `yaml:"env" env-default:"local"`
 	GRPCServer `yaml:"grpc_server"`
 	PostgreSQL `yaml:"postgresql"`
+	JWT        `yaml:"jwt"`
 }
 
 type GRPCServer struct {
@@ -18,6 +21,11 @@ type GRPCServer struct {
 
 type PostgreSQL struct {
 	DSN string `yaml:"dsn" env-required:"true"`
+}
+
+type JWT struct {
+	Secrets    []string      `yaml:"secrets" env-required:"true"`
+	SessionTTL time.Duration `yaml:"session_ttl" env-default:"24h"`
 }
 
 func MustLoad() *Config {
